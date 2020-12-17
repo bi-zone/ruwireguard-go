@@ -149,7 +149,6 @@ func randDevice(t *testing.T) *Device {
 }
 
 func hexReader(s string) io.Reader {
-	fmt.Println(s)
 	res, err := hex.DecodeString(s)
 	if err != nil {
 		panic(err)

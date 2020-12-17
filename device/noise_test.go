@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/binary"
+	"encoding/hex"
 	"testing"
 )
 
@@ -199,6 +200,15 @@ func TestNoiseHandshakeVectors(t *testing.T) {
 	t.Log("initiator's  state after sending initiation message:")
 	t.Logf("chainkey state: % x", peer1.handshake.chainKey[:])
 
+	testChainKey1, err := hex.DecodeString("69b5cc4a8d6956325b0ab2939a3fad634000cdb9e0b647101a325805772fe13d")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !bytes.Equal(peer1.handshake.chainKey[:], testChainKey1) {
+		t.Fatal("wrong chain key state")
+	}
+
 	assertEqual(
 		t,
 		peer1.handshake.hash[:],
@@ -232,6 +242,15 @@ func TestNoiseHandshakeVectors(t *testing.T) {
 	t.Log("responder's  state after sending response message:")
 	t.Logf("chainkey state: % x", peer2.handshake.chainKey[:])
 
+	testChainKey2, err := hex.DecodeString("22bf0e8be82132d8ee3f2d0ec52d27f542b5689b778eb8f2b19665b69494e27c")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !bytes.Equal(peer2.handshake.chainKey[:], testChainKey2) {
+		t.Fatal("wrong chain key state")
+	}
+
 	// key pairs
 
 	t.Log("deriving keys")
@@ -259,9 +278,27 @@ func TestNoiseHandshakeVectors(t *testing.T) {
 		var err error
 		var out []byte
 		var nonce [AEADNonceSize]byte
-		out = key1.send.Seal(out, nonce[:], testMsg, nil)
+		t.Logf("test msg1 nonce 1: % x", nonce)
+
+		var additionalData [AdditionalDataSize]byte
+		binary.LittleEndian.PutUint32(additionalData[0:4], MessageTransportType)
+		binary.LittleEndian.PutUint32(additionalData[4:8], 1)
+		binary.LittleEndian.PutUint32(additionalData[8:12], 2)
+		t.Logf("test msg1 ad: % x", additionalData)
+
+		out = key1.send.Seal(out, nonce[:], testMsg, additionalData[:])
 		t.Logf("encrypted message 1 : % x", out)
-		out, err = key2.receive.Open(out[:0], nonce[:], out, nil)
+
+		testOut, err := hex.DecodeString("9d652aa28d7c6abef1f7f4dbdc8b3745af776cc2ef10199066bcaf179203edd5282656b14ef89945942bdf8a1063f868")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !bytes.Equal(out, testOut) {
+			t.Fatal("wrong ciphertext for message 1")
+		}
+
+		out, err = key2.receive.Open(out[:0], nonce[:], out, additionalData[:])
 		assertNil(t, err)
 		assertEqual(t, out, testMsg)
 
@@ -273,9 +310,27 @@ func TestNoiseHandshakeVectors(t *testing.T) {
 		var err error
 		var out []byte
 		var nonce [AEADNonceSize]byte
-		out = key2.send.Seal(out, nonce[:], testMsg, nil)
+		t.Logf("test msg1 nonce 1: % x", nonce)
+
+		var additionalData [AdditionalDataSize]byte
+		binary.LittleEndian.PutUint32(additionalData[0:4], MessageTransportType)
+		binary.LittleEndian.PutUint32(additionalData[4:8], 1)
+		binary.LittleEndian.PutUint32(additionalData[8:12], 2)
+		t.Logf("test msg1 ad: % x", additionalData)
+
+		out = key2.send.Seal(out, nonce[:], testMsg, additionalData[:])
 		t.Logf("encrypted message 2 : % x", out)
-		out, err = key1.receive.Open(out[:0], nonce[:], out, nil)
+
+		testOut, err := hex.DecodeString("c11b69a043ff5b77afd1b6b1b0ecaa3a3f6e46cc40814b50d99b49179e00ffa7010b9c7c47513074983d38b0adc39d97")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !bytes.Equal(out, testOut) {
+			t.Fatal("wrong ciphertext for message 2")
+		}
+
+		out, err = key1.receive.Open(out[:0], nonce[:], out, additionalData[:])
 		assertNil(t, err)
 		assertEqual(t, out, testMsg)
 	}()
