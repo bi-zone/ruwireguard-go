@@ -272,6 +272,9 @@ func TestNoiseHandshakeVectors(t *testing.T) {
 
 	t.Log("test key pairs")
 
+	initiatorIndex := uint32(1)
+	responderIndex := uint32(2)
+
 	func() {
 		testMsg := []byte("ru wireguard test message 1-----")
 		t.Logf("test  message 1: % x", testMsg)
@@ -282,8 +285,8 @@ func TestNoiseHandshakeVectors(t *testing.T) {
 
 		var additionalData [AdditionalDataSize]byte
 		binary.LittleEndian.PutUint32(additionalData[0:4], MessageTransportType)
-		binary.LittleEndian.PutUint32(additionalData[4:8], 1)
-		binary.LittleEndian.PutUint32(additionalData[8:12], 2)
+		binary.LittleEndian.PutUint32(additionalData[4:8], initiatorIndex)
+		binary.LittleEndian.PutUint32(additionalData[8:12], responderIndex)
 		t.Logf("test msg1 ad: % x", additionalData)
 
 		out = key1.send.Seal(out, nonce[:], testMsg, additionalData[:])
@@ -314,14 +317,14 @@ func TestNoiseHandshakeVectors(t *testing.T) {
 
 		var additionalData [AdditionalDataSize]byte
 		binary.LittleEndian.PutUint32(additionalData[0:4], MessageTransportType)
-		binary.LittleEndian.PutUint32(additionalData[4:8], 1)
-		binary.LittleEndian.PutUint32(additionalData[8:12], 2)
+		binary.LittleEndian.PutUint32(additionalData[4:8], responderIndex)
+		binary.LittleEndian.PutUint32(additionalData[8:12], initiatorIndex)
 		t.Logf("test msg1 ad: % x", additionalData)
 
 		out = key2.send.Seal(out, nonce[:], testMsg, additionalData[:])
 		t.Logf("encrypted message 2 : % x", out)
 
-		testOut, err := hex.DecodeString("c11b69a043ff5b77afd1b6b1b0ecaa3a3f6e46cc40814b50d99b49179e00ffa7010b9c7c47513074983d38b0adc39d97")
+		testOut, err := hex.DecodeString("c11b69a043ff5b77afd1b6b1b0ecaa3a3f6e46cc40814b50d99b49179e00ffa73c14186c574954fa26522f50ee3b2f8b")
 		if err != nil {
 			t.Fatal(err)
 		}
