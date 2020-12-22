@@ -1,5 +1,4 @@
 # RuWireGuard-Go
-
 This is a reference implementation of the [Ru-WireGuard](https://github.com/bi-zone/ruwireguard-spec/blob/main/ruwireguard-draft.md) protocol in Go.
  
 Ru-WireGuard-Go is a WireGuard-Go [fork]((https://github.com/WireGuard/wireguard-go/releases/tag/v0.0.20201118)).
@@ -7,15 +6,17 @@ Ru-WireGuard-Go is a WireGuard-Go [fork]((https://github.com/WireGuard/wireguard
 It has the same semantics as the original WireGuard protocol but employs the cryptographic algorithms defined
  by the Russian national standards (GOST).
  
-**This software is experimental. You must not use this in production.**
+## Warnings
+- Maturity: The code is experimental. You must not use this in production
+- Audit: The code is not audited
+- Stability: Breaking changes are expected
+- Performance: elliptic curve and MGM implementations are extremely slow
  
 ## Goals
-
 At the present time, the main goal of the project is to provide an implementation of the core protocol with GOST primitives. 
 Formal verification, high-performance and stable cross-platform usage are out of the scope.
 
 ## Dependencies
-
 RuWireGuard-Go relies on the following packages:
  - [GoGOST](https://www.git.cypherpunks.ru/?p=gogost.git)
  - [GOSThopper](https://dxdt.ru/golang/gosthopper/dxdt.ru/gosthopper/gosthopper.go)
